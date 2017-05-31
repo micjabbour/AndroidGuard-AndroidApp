@@ -2,15 +2,38 @@
     <string name="app_name">Android Guard</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
+    <string name="prompt_username">Username</string>
     <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="action_sign_in">register device</string>
+    <string name="action_sign_in_short">register</string>
+    <string name="error_invalid_username">This username is invalid</string>
+    <string name="error_invalid_password">This password is invalid</string>
+    <string name="error_invalid_device_name">This device name is invalid</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="prompt_device_name">Device name</string>
+    <string name="error_register_creds_error">Username/password error</string>
+    <string name="error_network_error_title">Internet connection error</string>
+    <string name="error_network_error_message">Could not reach the application server.\nPlease check your internet connection and try again</string>
+    <string name="warning_device_exists_title">Device already exists</string>
+    <string name="warning_device_exists_message">The device name already exists on the server.\nDo you want to set this device to the same name anyway?</string>
+    <string name="error_unknown_error">Unknown error occured</string>
+    <string name="exit">Exit</string>
+    <string name="positive">Yes</string>
+    <string name="negative">No</string>
+    <string name="status">Status</string>
+    <string name="status_ok">connected</string>
+    <string name="status_disconnected">disconnected</string>
+    <string name="status_auth_problem">authentication problems</string>
+    <string name="status_unkown_error">unkown error</string>
+    <string name="status_ok_details">device is connected to the server and it is ready to receive commands.</string>
+    <string name="status_disconnected_details">internet connection error, please check internet connection and try again.</string>
+    <string name="status_auth_problem_details">something went wrong while trying to authenticate with the server.\nPlease try logging out, and registering the device again.</string>
+    <string name="status_unkown_error_details">an unkown error occurred.</string>
+    <string name="button_logout">logout</string>
+    <string name="button_hide">enter stealth mode</string>
+    <string name="button_hide_short">hide</string>
+    <string name="button_show">show app</string>
+    <string name="prompt_secret_number">secret dial number</string>
+    <string name="secret_number_explanation">you can use your secret dial number (configured below) to access the application when it is hidden.\njust dial the secret number on your phone, and the hidden app will show up.\nbe careful not to lose your secret number!</string>
 </resources>

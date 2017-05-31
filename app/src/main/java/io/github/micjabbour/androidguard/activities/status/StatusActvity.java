@@ -1,0 +1,176 @@
+package io.github.micjabbour.androidguard.activities.status;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.content.Intent;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import io.github.micjabbour.androidguard.AndroidGuardApp;
+import io.github.micjabbour.androidguard.AppSettings;
+import io.github.micjabbour.androidguard.R;
+import io.github.micjabbour.androidguard.activities.setup.SetupActivity;
+
+public class StatusActvity extends AppCompatActivity implements StatusView {
+    //presenter
+    private StatusPresenter presenter;
+    //UI references
+    @BindView(R.id.status_progress)
+    ProgressBar mProgressView;
+    @BindView(R.id.status_layout)
+    View mStatusLayoutView;
+    @BindView(R.id.tv_status)
+    TextView mStatusView;
+    @BindView(R.id.tv_status_details)
+    TextView mStatusDetailsView;
+    @BindView(R.id.button_logout)
+    Button mLogoutButton;
+    @BindView(R.id.button_hide_show_app)
+    Button mHideShowAppButton;
+    @BindView(R.id.tv_secret_number)
+    TextView mSecretNumberEditText;
+    boolean appIsHidden = false;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_status);
+        ButterKnife.bind(this);
+        presenter = new StatusPresenterImpl(this, (AndroidGuardApp)getApplication());
+        mLogoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppSettings settings = new AppSettings(StatusActvity.this);
+                settings.clearAllAuthInfo();
+                Intent intent = new Intent(StatusActvity.this, SetupActivity.class);
+                finish();
+                startActivity(intent);
+            }
+        });
+        //check for status
+        showProgress(true);
+        presenter.checkStatus();
+        appIsHidden = presenter.isAppHidden();
+
+        mHideShowAppButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideShowApp();
+            }
+        });
+        mSecretNumberEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int id, KeyEvent event) {
+                if(id == R.id.hide || id == EditorInfo.IME_NULL) {
+                    hideShowApp();
+                    return true;
+                }
+                return false;
+            }
+        });
+        resetHideShowButtonText();
+        //set text on text edit to the previously configured secret number
+        AppSettings settings = new AppSettings(this);
+        mSecretNumberEditText.setText(settings.getSecretNumber());
+    }
+
+    private void hideShowApp() {
+        if(!appIsHidden) {
+            AppSettings settings = new AppSettings(this);
+            settings.setSecretNumber(mSecretNumberEditText.getText().toString());
+        }
+        //reverse hide/show state
+        presenter.showAppIcon(appIsHidden);
+        appIsHidden= !appIsHidden;
+        if(appIsHidden) finish();
+        //reset button text
+        resetHideShowButtonText();
+    }
+
+    private void resetHideShowButtonText() {
+        if(appIsHidden)
+            mHideShowAppButton.setText(getString(R.string.button_show));
+        else
+            mHideShowAppButton.setText(getString(R.string.button_hide));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        presenter.rxUnSubscribe();
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mStatusLayoutView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mStatusLayoutView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mStatusLayoutView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mStatusLayoutView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void setStatus(Status s) {
+        showProgress(false);
+        switch(s) {
+            case CONNECTED:
+                mStatusView.setText(getString(R.string.status_ok));
+                mStatusDetailsView.setText(getString(R.string.status_ok_details));
+                mStatusView.setTextColor(ContextCompat.getColor(this, R.color.colorOk));
+                break;
+            case DISCONNECTED:
+                mStatusView.setText(getString(R.string.status_disconnected));
+                mStatusDetailsView.setText(getString(R.string.status_disconnected_details));
+                mStatusView.setTextColor(ContextCompat.getColor(this, R.color.colorError));
+                break;
+            case UNKOWN_ERROR:
+                mStatusView.setText(getString(R.string.status_unkown_error));
+                mStatusDetailsView.setText(getString(R.string.status_unkown_error_details));
+                mStatusView.setTextColor(ContextCompat.getColor(this, R.color.colorError));
+                break;
+            case AUTHENTICATION_ERROR:
+                mStatusView.setText(getString(R.string.status_auth_problem));
+                mStatusDetailsView.setText(getString(R.string.status_auth_problem_details));
+                mStatusView.setTextColor(ContextCompat.getColor(this, R.color.colorError));
+                mLogoutButton.setVisibility(View.VISIBLE);
+                break;
+        }
+    }
+}
