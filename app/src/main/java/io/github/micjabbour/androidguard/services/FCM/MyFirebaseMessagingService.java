@@ -1,4 +1,4 @@
-package io.github.micjabbour.androidguard;
+package io.github.micjabbour.androidguard.services.FCM;
 
 import android.util.Log;
 

@@ -1,10 +1,13 @@
-package io.github.micjabbour.androidguard;
+package io.github.micjabbour.androidguard.services.FCM;
 
 import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
+import io.github.micjabbour.androidguard.AndroidGuardApp;
+import io.github.micjabbour.androidguard.AppSettings;
+import io.github.micjabbour.androidguard.NetworkService;
 import io.github.micjabbour.androidguard.models.FcmTokenRequest;
 import io.github.micjabbour.androidguard.models.FcmTokenResponse;
 import io.reactivex.Observable;

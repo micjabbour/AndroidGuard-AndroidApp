@@ -1,12 +1,9 @@
 package io.github.micjabbour.androidguard.activities.status;
 
-import android.content.ComponentName;
-import android.content.pm.PackageManager;
-
 import io.github.micjabbour.androidguard.AndroidGuardApp;
+import io.github.micjabbour.androidguard.services.location.LocationUpdateServiceUtils;
 import io.github.micjabbour.androidguard.NetworkService;
 import io.github.micjabbour.androidguard.ShowHideApp;
-import io.github.micjabbour.androidguard.activities.LauncherActivity;
 import io.github.micjabbour.androidguard.models.TestTokenResponse;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -14,7 +11,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.Request;
 import retrofit2.Response;
 
 /**
@@ -67,6 +63,8 @@ public class StatusPresenterImpl implements StatusPresenter {
                     view.setStatus(StatusView.Status.UNKOWN_ERROR);
                 } else {
                     view.setStatus(StatusView.Status.CONNECTED);
+                    //schedule location update service
+                    LocationUpdateServiceUtils.scheduleLocationUpdateService(application, LocationUpdateServiceUtils.UpdateMode.NORMAL);
                 }
             }
 

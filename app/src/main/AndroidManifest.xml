@@ -3,7 +3,9 @@
     package="io.github.micjabbour.androidguard">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:name=".AndroidGuardApp"
@@ -24,19 +26,19 @@
         </activity>
         <activity
             android:name=".activities.setup.SetupActivity"
-            android:label="@string/app_name"></activity>
+            android:label="@string/app_name" />
         <activity
             android:name=".activities.status.StatusActvity"
             android:label="@string/status" />
 
         <service
-            android:name=".MyFirebaseInstanceIdService"
+            android:name=".services.FCM.MyFirebaseInstanceIdService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".MyFirebaseMessagingService">
+        <service android:name=".services.FCM.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -46,10 +48,19 @@
             android:name=".OutgoingCallHandler"
             android:enabled="true"
             android:exported="true">
-            <intent-filter >
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
+            <intent-filter>
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".services.location.LocationUpdateJobService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
