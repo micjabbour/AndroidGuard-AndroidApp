@@ -1,11 +1,16 @@
 package io.github.micjabbour.androidguard.activities.status;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -14,6 +19,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,6 +50,13 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
     @BindView(R.id.tv_secret_number)
     TextView mSecretNumberEditText;
     boolean appIsHidden = false;
+    private static final String[] neededPermissions = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.PROCESS_OUTGOING_CALLS
+    };
+
+    final private int REQUEST_CODE_ASK_ALL_PERMISSIONS = 124;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +75,7 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
         });
         //check for status
         showProgress(true);
-        presenter.checkStatus();
+        checkStatusWrapper();
         appIsHidden = presenter.isAppHidden();
 
         mHideShowAppButton.setOnClickListener(new View.OnClickListener() {
@@ -173,4 +189,78 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
                 break;
         }
     }
+
+    private void showMessageOK(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        StatusActvity.this.finish();
+                    }
+                })
+                .create()
+                .show();
+    }
+
+
+    private boolean addPermission(List<String> permissionsList, String permission) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(permission);
+            // Check for Rationale Option
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                return false;
+        }
+        return true;
+    }
+
+    private void checkStatusWrapper() {
+        //check if permissions are not granted
+        final List<String> permissionsList = new ArrayList<>();
+        for(String permission : neededPermissions)
+            addPermission(permissionsList, permission);
+        //if there are any permissions that are not granted
+        if (permissionsList.size() > 0) {
+            //show message box to request permissions
+            showMessageOK(getString(R.string.need_all_permissions),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //request permissions from user
+                            ActivityCompat.requestPermissions(StatusActvity.this,
+                                    permissionsList.toArray(new String[permissionsList.size()]),
+                                    REQUEST_CODE_ASK_ALL_PERMISSIONS);
+                        }
+                    });
+            return;
+        }
+        //if all permissions are already granted
+        presenter.checkStatus();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_ALL_PERMISSIONS:
+            {
+                //check if all permissions are granted
+                for(int grantResult : grantResults) {
+                    if(grantResult!= PackageManager.PERMISSION_GRANTED) {
+                        // some permission is not granted
+                        Toast.makeText(this, getString(R.string.error_permission_denied), Toast.LENGTH_SHORT)
+                                .show();
+                        finish();
+                        return;
+                    }
+                }
+                //if all permissions are granted, do check current status
+                presenter.checkStatus();
+            }
+            break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
 }

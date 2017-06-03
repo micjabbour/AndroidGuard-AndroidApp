@@ -36,4 +36,8 @@
     <string name="button_show">show app</string>
     <string name="prompt_secret_number">secret dial number</string>
     <string name="secret_number_explanation">you can use your secret dial number (configured below) to access the application when it is hidden.\njust dial the secret number on your phone, and the hidden app will show up.\nbe careful not to lose your secret number!</string>
+    <string name="dialog_positive_button">Ok</string>
+    <string name="need_all_permissions">You need to grant access to all required permission to continue</string>
+    <string name="error_permission_denied">Some Permission is denied, exiting. . .</string>
+
 </resources>
