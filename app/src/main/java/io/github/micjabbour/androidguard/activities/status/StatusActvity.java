@@ -51,9 +51,13 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
     TextView mSecretNumberEditText;
     boolean appIsHidden = false;
     private static final String[] neededPermissions = new String[]{
+            Manifest.permission.INTERNET,
+            Manifest.permission.PROCESS_OUTGOING_CALLS,
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.PROCESS_OUTGOING_CALLS
+            Manifest.permission.RECEIVE_BOOT_COMPLETED,
+            Manifest.permission.RECEIVE_SMS,
+            Manifest.permission.SEND_SMS
     };
 
     final private int REQUEST_CODE_ASK_ALL_PERMISSIONS = 124;
