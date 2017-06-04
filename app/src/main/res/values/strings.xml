@@ -39,5 +39,6 @@
     <string name="dialog_positive_button">Ok</string>
     <string name="need_all_permissions">You need to grant access to all required permission to continue</string>
     <string name="error_permission_denied">Some Permission is denied, exiting. . .</string>
+    <string name="google_play_services_error">fatal google play services error.\nunable to continue, exiting. . .</string>
 
 </resources>

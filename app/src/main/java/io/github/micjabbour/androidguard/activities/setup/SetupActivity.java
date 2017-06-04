@@ -18,6 +18,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.util.ArrayList;
 
@@ -55,9 +59,11 @@ public class SetupActivity extends AppCompatActivity implements SetupView {
     TextView mTextViewError;
 
     private static final String BACKGROUND_REQUEST_KEY = "BACKGROUND_REQUEST_KEY";
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private boolean backroundRequest = false;
 
 
+    private static final String LOG_TAG = "SetupActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,11 +87,13 @@ public class SetupActivity extends AppCompatActivity implements SetupView {
                 attemptDeviceRegistration();
             }
         });
-        //requestPermissionsIfNotGranted();
+
         if(savedInstanceState!=null){
             backroundRequest = savedInstanceState.getBoolean(BACKGROUND_REQUEST_KEY);
             if(backroundRequest) attemptDeviceRegistration();
         }
+
+        checkPlayServices();
     }
 
     @Override
@@ -116,32 +124,6 @@ public class SetupActivity extends AppCompatActivity implements SetupView {
                 result.add(permission);
         }
         return result;
-    }
-
-    private void requestPermissionsIfNotGranted() {
-        //TODO: request runtime permissions
-        /*
-        ArrayList<String> ungrantedPermissions = ungrantedPermissions();
-        if(ungrantedPermissions.isEmpty()) return;
-        RxPermission.with(getFragmentManager())
-                .request(ungrantedPermissions.toArray(new String[ungrantedPermissions.size()]))
-                .subscribe(new Subscriber<Boolean>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onNext(Boolean granted) {
-                        if(!granted)
-                            requestPermissionsIfNotGranted();
-                    }
-                });*/
     }
 
     /**
@@ -317,6 +299,23 @@ public class SetupActivity extends AppCompatActivity implements SetupView {
     @Override
     public String getStringFromResId(int resId) {
         return getString(resId);
+    }
+
+    //see https://stackoverflow.com/a/31016761/
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Toast.makeText(this, getString(R.string.google_play_services_error), Toast.LENGTH_LONG).show();
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }
 
