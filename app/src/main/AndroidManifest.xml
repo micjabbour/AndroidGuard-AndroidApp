@@ -48,7 +48,7 @@
         </service>
 
         <receiver
-            android:name=".OutgoingCallHandler"
+            android:name=".receivers.OutgoingCallHandler"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -58,7 +58,7 @@
 
 
         <service
-            android:name=".services.location.LocationUpdateJobService"
+            android:name=".services.LocationUpdateJobService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -67,7 +67,7 @@
         </service>
 
         <receiver
-            android:name=".SmsReceiveHandler"
+            android:name=".receivers.SmsReceiveHandler"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />

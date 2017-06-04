@@ -1,4 +1,4 @@
-package io.github.micjabbour.androidguard;
+package io.github.micjabbour.androidguard.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +9,8 @@ import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+
+//receives SMS messages, extracts commands, sends them to GuardComandHandler to handle them
 public class SmsReceiveHandler extends BroadcastReceiver {
 
     @Override

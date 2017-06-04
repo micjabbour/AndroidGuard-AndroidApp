@@ -1,7 +1,8 @@
-package io.github.micjabbour.androidguard.services.location;
+package io.github.micjabbour.androidguard.services;
 
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,8 +11,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -36,6 +44,38 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
     private Disposable mDisposable;
     private JobParameters mJob;
     public static final String LOG_TAG = "LocUpdateService";
+
+    //a static function to schedule the JobService
+    public static void reschedule(Context context) {
+        // see https://github.com/firebase/firebase-jobdispatcher-android
+
+        // Create a new dispatcher using the Google Play driver.
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
+        //schedule again using new parameters
+        Job job = dispatcher.newJobBuilder()
+                .setService(LocationUpdateJobService.class) // the JobService that will be called
+                .setTag(AndroidGuardApp.locationUpdateJobTag)        // uniquely identifies the job
+                .setRecurring(true)
+                .setLifetime(Lifetime.FOREVER)
+                .setTrigger(Trigger.executionWindow(30*60, 60*60))
+                .setReplaceCurrent(true)
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
+        dispatcher.mustSchedule(job);
+        //perform one location update as soon as poosible, so that we don't have to wait about one
+        //hour until we get the first location
+        Job oneShotJob = dispatcher.newJobBuilder()
+                .setService(LocationUpdateJobService.class)
+                .setTag(AndroidGuardApp.locationUpdateOneShotJobTag)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setTrigger(Trigger.executionWindow(0, 60)) //within next miinute
+                .setReplaceCurrent(true)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
+        dispatcher.mustSchedule(oneShotJob);
+    }
 
     @Override
     public void onCreate() {
@@ -85,6 +125,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
                 Log.e(LOG_TAG, "requestLocationUpdates security exception: "+e.getMessage());
             }
         } else { //it is okay to send lastLocation to webservice
+            mGoogleApiClient.disconnect();
             sendToWebService(lastLocation);
         }
     }
@@ -175,6 +216,6 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public boolean onStopJob(JobParameters job) {
-        return false;
+        return true;
     }
 }

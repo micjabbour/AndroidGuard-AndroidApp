@@ -5,19 +5,18 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import io.github.micjabbour.androidguard.GuardCommandHandler;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     public static final String TAG = "FCMMessagingService";
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
 
         if(remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-        }
-
-        if(remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            String command = remoteMessage.getData().get("command");
+            GuardCommandHandler.handleCommand(this, command);
         }
 
     }

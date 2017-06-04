@@ -1,9 +1,11 @@
-package io.github.micjabbour.androidguard;
+package io.github.micjabbour.androidguard.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import io.github.micjabbour.androidguard.AppSettings;
+import io.github.micjabbour.androidguard.ShowHideApp;
 import io.github.micjabbour.androidguard.activities.LauncherActivity;
 
 

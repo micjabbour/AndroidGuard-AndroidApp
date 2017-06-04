@@ -1,7 +1,7 @@
 package io.github.micjabbour.androidguard.activities.status;
 
 import io.github.micjabbour.androidguard.AndroidGuardApp;
-import io.github.micjabbour.androidguard.services.location.LocationUpdateServiceUtils;
+import io.github.micjabbour.androidguard.services.LocationUpdateJobService;
 import io.github.micjabbour.androidguard.NetworkService;
 import io.github.micjabbour.androidguard.ShowHideApp;
 import io.github.micjabbour.androidguard.models.TestTokenResponse;
@@ -64,7 +64,7 @@ public class StatusPresenterImpl implements StatusPresenter {
                 } else {
                     view.setStatus(StatusView.Status.CONNECTED);
                     //schedule location update service
-                    LocationUpdateServiceUtils.scheduleLocationUpdateService(application, LocationUpdateServiceUtils.UpdateMode.NORMAL);
+                    LocationUpdateJobService.reschedule(application);
                 }
             }
 

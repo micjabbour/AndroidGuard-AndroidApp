@@ -301,7 +301,13 @@ public class SetupActivity extends AppCompatActivity implements SetupView {
         return getString(resId);
     }
 
-    //see https://stackoverflow.com/a/31016761/
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    //see https://stackoverflow.com/a/31016761
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
