@@ -2,6 +2,7 @@ package io.github.micjabbour.androidguard;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import io.github.micjabbour.androidguard.activities.LauncherActivity;
@@ -18,6 +19,9 @@ public class ShowHideApp {
             PackageManager p = context.getPackageManager();
             ComponentName componentName = new ComponentName(context, LauncherActivity.class);
             p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+            // Start the app
+            Intent i=new Intent(context,LauncherActivity.class);;
+            context.startActivity(i);
         } else {
             PackageManager p = context.getPackageManager();
             ComponentName componentName = new ComponentName(context, LauncherActivity.class);

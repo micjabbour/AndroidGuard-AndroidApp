@@ -113,8 +113,6 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
         presenter.showAppIcon(appIsHidden);
         appIsHidden= !appIsHidden;
         if(appIsHidden) finish();
-        //reset button text
-        resetHideShowButtonText();
     }
 
     private void resetHideShowButtonText() {

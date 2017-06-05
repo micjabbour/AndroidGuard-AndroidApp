@@ -31,9 +31,6 @@ public class OutgoingCallHandler extends BroadcastReceiver {
             setResultData(null);
             // application icon
             ShowHideApp.showAppIcon(context, true);
-            // Start the app
-            Intent i=new Intent(context,LauncherActivity.class);;
-            context.startActivity(i);
         }
     }
 }

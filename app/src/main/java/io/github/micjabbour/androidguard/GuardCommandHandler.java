@@ -2,6 +2,7 @@ package io.github.micjabbour.androidguard;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import io.github.micjabbour.androidguard.services.LocationUpdateJobService;
 
@@ -13,6 +14,8 @@ import io.github.micjabbour.androidguard.services.LocationUpdateJobService;
 //processes a given command, used by FCM firebase messaging service
 //and by SmsReceiveHandler
 public class GuardCommandHandler {
+    private static String LOG_TAG = "GuardCommandHandler";
+
     public static void handleCommand(Context context, String command) {
         handleCommand(context, command, null);
     }
@@ -22,7 +25,16 @@ public class GuardCommandHandler {
     public static void handleCommand(Context context, String command, @Nullable String phoneNumber) {
         switch(command) {
             case "getloc":
-                LocationUpdateJobService.reschedule(context);
+                if(phoneNumber != null)
+                    LocationUpdateJobService.scheduleForSms(context, phoneNumber);
+                else
+                    LocationUpdateJobService.reschedule(context);
+                break;
+            case "showapp":
+                ShowHideApp.showAppIcon(context, true);
+                break;
+            case "wipesdcard":
+                Log.e(LOG_TAG, "wipesdcard command received");
                 break;
         }
     }

@@ -9,6 +9,7 @@ import android.app.Application;
 public class AndroidGuardApp extends Application {
     public static final String locationUpdateJobTag = "location-update-job-tag";
     public static final String locationUpdateOneShotJobTag = "location-update-one-shot-job-tag";
+    public static final String locationUpdateSMSJobTag = "location-update-sms-job-tag";
     private NetworkService networkService;
     @Override
     public void onCreate() {

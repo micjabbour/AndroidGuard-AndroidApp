@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.Constraint;
@@ -77,6 +78,23 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
         dispatcher.mustSchedule(oneShotJob);
     }
 
+    public static void scheduleForSms(Context context, String phoneNumber) {
+        // Create a new dispatcher using the Google Play driver.
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context));
+        Bundle bundle = new Bundle();
+        bundle.putString("phone_number", phoneNumber);
+        Job smsJob = dispatcher.newJobBuilder()
+                .setService(LocationUpdateJobService.class)
+                .setTag(AndroidGuardApp.locationUpdateSMSJobTag)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setTrigger(Trigger.executionWindow(0,60)) //within next minute
+                .setReplaceCurrent(true)
+                .setExtras(bundle)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
+        dispatcher.mustSchedule(smsJob);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -104,7 +122,6 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
         //Get last location
         Location lastLocation = null;
         try {
-            //TODO: request permissions from user instead of catching the exeptions silently
             lastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
         } catch (SecurityException e) {
@@ -123,10 +140,11 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
                         locationRequest, this);
             } catch (SecurityException e) {
                 Log.e(LOG_TAG, "requestLocationUpdates security exception: "+e.getMessage());
+                jobFinished(mJob, true); //error, needs reschedule
             }
         } else { //it is okay to send lastLocation to webservice
             mGoogleApiClient.disconnect();
-            sendToWebService(lastLocation);
+            sendLocationBack(lastLocation);
         }
     }
 
@@ -134,11 +152,25 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
     public void onLocationChanged(Location location) {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
-        sendToWebService(location);
+        sendLocationBack(location);
     }
 
     //send location to web service, and finishes the job service when done
-    private void sendToWebService(Location location) {
+    //if there is a phone number in the bundle, the location is sent via SMS to the phone instead
+    private void sendLocationBack(Location location) {
+        String phoneNumber = null;
+        Bundle bundle = mJob.getExtras();
+        if(bundle != null) phoneNumber = bundle.getString("phone_number");
+        if(phoneNumber != null) {
+            //send SMS to phone number
+            Log.d(LOG_TAG, "sending sms back to phoneNumber: "+phoneNumber);
+            String message = "Latitude: "+location.getLatitude()+"\n";
+            message += "Longitude: "+location.getLongitude()+"\n";
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            jobFinished(mJob, false);
+            return;
+        }
         LocationUpdateRequest updateRequest = new LocationUpdateRequest(
                 String.valueOf(location.getLatitude()),
                 String.valueOf(location.getLongitude())
@@ -191,6 +223,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(LOG_TAG, "google api client connection failed");
+        jobFinished(mJob, true); //error, needs reschedule
     }
 
 

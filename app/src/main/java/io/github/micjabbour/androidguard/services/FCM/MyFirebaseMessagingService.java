@@ -12,7 +12,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String TAG = "FCMMessagingService";
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-
+        Log.d(TAG, "Message received");
         if(remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             String command = remoteMessage.getData().get("command");
