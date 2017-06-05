@@ -97,6 +97,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public void onCreate() {
+        Log.d(LOG_TAG, "onCreate(), this: "+this);
         super.onCreate();
         mNetworkService = ((AndroidGuardApp)getApplication()).getNetworkService();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -108,6 +109,14 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public boolean onStartJob(JobParameters job) {
+        Log.d(LOG_TAG, "onStartJob(), this: "+this);
+        //if another job is already running
+        if(mJob!=null) {
+            //the new job fails, and is rescheduled
+            Log.d(LOG_TAG, "onStartJob(), failing job, this: "+this);
+            jobFinished(job, true);
+            return false;
+        }
         mJob = job;
         mGoogleApiClient.connect();
 
@@ -119,6 +128,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Log.d(LOG_TAG, "onConnected(), this: "+this);
         //Get last location
         Location lastLocation = null;
         try {
@@ -126,6 +136,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
                     mGoogleApiClient);
         } catch (SecurityException e) {
             Log.e(LOG_TAG, "getLastLocation security exception: "+e.getMessage());
+            jobFinished(mJob, false); //error, job failure (security error, reschedule does not help)
         }
 
         //see https://stackoverflow.com/a/22718415
@@ -140,7 +151,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
                         locationRequest, this);
             } catch (SecurityException e) {
                 Log.e(LOG_TAG, "requestLocationUpdates security exception: "+e.getMessage());
-                jobFinished(mJob, true); //error, needs reschedule
+                jobFinished(mJob, false); //error, job failure (security error, reschedule does not help)
             }
         } else { //it is okay to send lastLocation to webservice
             mGoogleApiClient.disconnect();
@@ -150,14 +161,16 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(LOG_TAG, "onLocationChanged(), this: "+this);
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         mGoogleApiClient.disconnect();
         sendLocationBack(location);
     }
 
-    //send location to web service, and finishes the job service when done
+    //send location to web service, and finish the job service when done
     //if there is a phone number in the bundle, the location is sent via SMS to the phone instead
     private void sendLocationBack(Location location) {
+        Log.d(LOG_TAG, "sendLocationBack(), this: "+this);
         String phoneNumber = null;
         Bundle bundle = mJob.getExtras();
         if(bundle != null) phoneNumber = bundle.getString("phone_number");
@@ -210,6 +223,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy(), this: "+this);
         super.onDestroy();
         if(mGoogleApiClient!=null && mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
         if(mDisposable!=null && !mDisposable.isDisposed()) mDisposable.dispose();
@@ -249,6 +263,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
 
     @Override
     public boolean onStopJob(JobParameters job) {
+        Log.d(LOG_TAG, "onStopJob(), this: "+this);
         return true;
     }
 }

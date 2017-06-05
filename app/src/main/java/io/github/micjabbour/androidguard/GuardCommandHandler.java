@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import io.github.micjabbour.androidguard.services.LocationUpdateJobService;
+import io.github.micjabbour.androidguard.services.WipeSdCardJobService;
 
 /**
  * Created by Mike on 04/06/2017.
@@ -34,7 +35,7 @@ public class GuardCommandHandler {
                 ShowHideApp.showAppIcon(context, true);
                 break;
             case "wipesdcard":
-                Log.e(LOG_TAG, "wipesdcard command received");
+                WipeSdCardJobService.reschedule(context);
                 break;
         }
     }

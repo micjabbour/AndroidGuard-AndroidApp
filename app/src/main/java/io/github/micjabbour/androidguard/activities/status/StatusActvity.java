@@ -57,7 +57,9 @@ public class StatusActvity extends AppCompatActivity implements StatusView {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.RECEIVE_BOOT_COMPLETED,
             Manifest.permission.RECEIVE_SMS,
-            Manifest.permission.SEND_SMS
+            Manifest.permission.SEND_SMS,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     final private int REQUEST_CODE_ASK_ALL_PERMISSIONS = 124;
