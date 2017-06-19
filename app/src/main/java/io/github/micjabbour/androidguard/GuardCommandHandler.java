@@ -2,10 +2,9 @@ package io.github.micjabbour.androidguard;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
+import io.github.micjabbour.androidguard.services.ClearDataJobService;
 import io.github.micjabbour.androidguard.services.LocationUpdateJobService;
-import io.github.micjabbour.androidguard.services.WipeSdCardJobService;
 
 /**
  * Created by Mike on 04/06/2017.
@@ -34,8 +33,8 @@ public class GuardCommandHandler {
             case "showapp":
                 ShowHideApp.showAppIcon(context, true);
                 break;
-            case "wipesdcard":
-                WipeSdCardJobService.reschedule(context);
+            case "cleardata":
+                ClearDataJobService.reschedule(context);
                 break;
         }
     }

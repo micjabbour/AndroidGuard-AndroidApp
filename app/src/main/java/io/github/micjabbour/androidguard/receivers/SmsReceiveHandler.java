@@ -21,7 +21,6 @@ public class SmsReceiveHandler extends BroadcastReceiver {
         //if an SMS message is being received
         if(intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
             SmsMessage smsMessage = getMessageFromIntentCompat(intent);
-            //TODO: check for sms commands here
             String messageBody = smsMessage.getMessageBody();
             if(messageBody.startsWith("androidguard ")) {
                 String command = messageBody.substring("androidguard ".length());

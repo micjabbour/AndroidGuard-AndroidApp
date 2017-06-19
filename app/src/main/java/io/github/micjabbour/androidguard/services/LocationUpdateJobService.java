@@ -150,6 +150,7 @@ public class LocationUpdateJobService extends JobService implements GoogleApiCli
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                         locationRequest, this);
             } catch (SecurityException e) {
+                //TODO: find a better way to handle security exceptions
                 Log.e(LOG_TAG, "requestLocationUpdates security exception: "+e.getMessage());
                 jobFinished(mJob, false); //error, job failure (security error, reschedule does not help)
             }
