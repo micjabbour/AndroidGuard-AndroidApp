@@ -21,6 +21,7 @@ public class ShowHideApp {
             p.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
             // Start the app
             Intent i=new Intent(context,LauncherActivity.class);;
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //to call startActivity() from outside of an Activity context
             context.startActivity(i);
         } else {
             PackageManager p = context.getPackageManager();
